@@ -9,9 +9,13 @@ import yfinance as yf
 import websocket
 import json
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
+# load env
+load_dotenv()
 
-API = "cmcnu91r01qjutgrvbagcmcnu91r01qjutgrvbb0"
+API = os.getenv('FINNHUB_API_KEY')
 
 # Initialize stock data
 stock_data = {

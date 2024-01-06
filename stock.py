@@ -8,8 +8,13 @@ import yfinance as yf
 import threading
 from datetime import datetime
 
-API = "cmcnu91r01qjutgrvbagcmcnu91r01qjutgrvbb0"
-enable_stack_trace = False
+import os
+from dotenv import load_dotenv
+
+# load env
+load_dotenv()
+
+API = os.getenv('FINNHUB_API_KEY')
 
 # Initialize a Plotly figure
 fig = go.Figure()
