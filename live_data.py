@@ -6,13 +6,18 @@ import yfinance as yf
 import threading
 from datetime import datetime
 import time
+import os
+from dotenv import load_dotenv
+
+# load env
+load_dotenv()
 
 class LiveStream():
 
     def __init__(self):
         # constants:
-        self.API_KEY = "cmcnu91r01qjutgrvbagcmcnu91r01qjutgrvbb0"
-        self.url = "wss://ws.finnhub.io?token=" + self.API_KEY
+        api_key = os.getenv('FINNHUB_API_KEY')
+        self.url = "wss://ws.finnhub.io?token=" + api_key
 
         # yahoo
         self.yahoo_symbol = "BTC-USD"
@@ -82,6 +87,7 @@ class LiveStream():
         if self.ws_app is not None:
             self.ws_app.close()
             self.ws_thread.join()
+            print("Closed Websocket!")
 
 
 if __name__ == '__main__':
