@@ -40,7 +40,8 @@ def on_message(ws, message):
             timestamp = trade.get('t')
             if price is not None and timestamp is not None:
                 timestamp = datetime.fromtimestamp(timestamp / 1000)
-                update_plot(timestamp, price)
+                # update_plot(timestamp, price)
+                print(timestamp, price)
 
 
 def on_error(ws, error):

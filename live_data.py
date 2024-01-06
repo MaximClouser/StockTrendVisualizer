@@ -32,6 +32,10 @@ class LiveStream():
         self.ws_thread = None
         self.start_websocket()
 
+
+    def get_data(self):
+        return self.data.copy()
+        
         
     def fetch_historical_data(self):
         stock = yf.Ticker(self.yahoo_symbol)
