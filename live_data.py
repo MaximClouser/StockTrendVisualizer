@@ -2,11 +2,10 @@
 # 60 calls / minute
 import websocket
 import json
-import pandas as pd
-import plotly.graph_objs as go
 import yfinance as yf
 import threading
 from datetime import datetime
+import time
 
 class LiveStream():
 
@@ -14,7 +13,6 @@ class LiveStream():
         # constants:
         self.API_KEY = "cmcnu91r01qjutgrvbagcmcnu91r01qjutgrvbb0"
         self.url = "wss://ws.finnhub.io?token=" + self.API_KEY
-        self.enable_stack_trace = False
 
         # yahoo
         self.yahoo_symbol = "BTC-USD"
@@ -28,7 +26,8 @@ class LiveStream():
         # initialize historic data
         self.data = self.fetch_historical_data()
 
-        # update with live data
+        # update with live data websocket
+        self.enable_stack_trace = False
         self.ws_app = None
         self.ws_thread = None
         self.start_websocket()
@@ -49,15 +48,16 @@ class LiveStream():
                 if price is not None and timestamp is not None:
                     timestamp = datetime.fromtimestamp(timestamp / 1000)
                     self.data.append((timestamp, price))
-                    # return price, timestamp
 
 
     def on_error(self, ws, error):
         print(error)
 
+
     def on_close(self, ws, close_status_code, close_msg):
         print("Close status code:", close_status_code)
         print("Close message:", close_msg)
+
 
     def on_open(self, ws):
         subscription_message = json.dumps({"type": "subscribe", "symbol": self.finnhub_symbol})
@@ -66,11 +66,11 @@ class LiveStream():
         # ws.send('{"type":"subscribe","symbol":"QQQ"}')
         # ws.send('{"type":"subscribe","symbol":"NASDAQ:QQQ"}')
 
+
     def start_websocket(self):
         websocket.enableTrace(self.enable_stack_trace)
         self.ws_app = websocket.WebSocketApp(self.url, on_message=self.on_message, on_error=self.on_error, on_close=self.on_close, on_open=self.on_open)
         self.ws_thread = threading.Thread(target=self.ws_app.run_forever)
-        # threading.Thread(target=self.ws_app.run_forever).start()
         self.ws_thread.start()
 
 
@@ -82,3 +82,13 @@ class LiveStream():
 
 if __name__ == '__main__':
     live = LiveStream()
+
+    print("DATA: ", live.data[-5:])
+
+    time.sleep(8)
+
+    print("DATA: ", live.data[-5:])
+
+    live.stop_websocket()
+
+    print("DATA: ", live.data[-5:])
