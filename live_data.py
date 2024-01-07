@@ -5,9 +5,11 @@ import json
 import yfinance as yf
 import threading
 from datetime import datetime
+from pandas import Timestamp
 import time
 import os
 from dotenv import load_dotenv
+import pytz
 
 # load env
 load_dotenv()
@@ -18,18 +20,21 @@ class LiveStream():
         # constants:
         api_key = os.getenv('FINNHUB_API_KEY')
         self.url = "wss://ws.finnhub.io?token=" + api_key
+        self.window = 100
 
         # yahoo
         self.yahoo_symbol = "BTC-USD"
         self.interval = "1m"
-        self.start_date = "2024-1-05"
-        self.end_date = "2024-1-06"
+        self.period = "1d"
+        self.time_zone = 'US/Eastern'
 
         #finnhub
         self.finnhub_symbol = "BINANCE:BTCUSDT"
 
         # initialize historic data
         self.data = self.fetch_historical_data()
+        # print("HISTORY Start: ", self.data[0])
+        # print("HISTORY END: ", self.data[-1])
 
         # update with live data websocket
         self.enable_stack_trace = False
@@ -39,13 +44,25 @@ class LiveStream():
 
 
     def get_data(self):
-        return self.data.copy()
+        return self.data[-self.window:]
         
         
     def fetch_historical_data(self):
+        # df = yf.download(tickers=self.yahoo_symbol, period="5y", interval="1m", auto_adjust=True, prepost=False)
         stock = yf.Ticker(self.yahoo_symbol)
-        historical_data = stock.history(start=self.start_date, end=self.end_date, interval=self.interval)
+        historical_data = stock.history(period = self.period, interval=self.interval)
+        eastern = pytz.timezone(self.time_zone)
+        historical_data.index = historical_data.index.tz_convert(eastern)
         return [(index, row['Close']) for index, row in historical_data.iterrows()]
+    
+
+    def add_data(self, data_point, raw_timestamp):
+        # only for 1m as of now, need to adapt later!
+        time = raw_timestamp % 6000
+        if time == 0:
+            self.data.append(data_point)
+        else:
+            self.data[-1] = data_point
 
 
     def on_message(self, ws, message):
@@ -53,10 +70,11 @@ class LiveStream():
         if 'data' in data:
             for trade in data['data']:
                 price = trade.get('p')
-                timestamp = trade.get('t')
-                if price is not None and timestamp is not None:
-                    timestamp = datetime.fromtimestamp(timestamp / 1000)
-                    self.data.append((timestamp, price))
+                raw_timestamp = trade.get('t')
+                if price is not None and raw_timestamp is not None:
+                    timestamp = Timestamp(raw_timestamp, unit='ms', tz=self.time_zone)
+                    new_data_point = (timestamp, price)
+                    self.add_data(new_data_point, raw_timestamp)
 
 
     def on_error(self, ws, error):
@@ -93,12 +111,16 @@ class LiveStream():
 if __name__ == '__main__':
     live = LiveStream()
 
-    print("DATA: ", live.data[-5:])
+    # print("DATA: ", live.data[-5:])
 
-    time.sleep(8)
+    time.sleep(120)
 
-    print("DATA: ", live.data[-5:])
+    # print("FRESH: ", live.data[-1])
+
+    # print("DATA: ", live.data[-5:])
+
+    # print(live.data[-60:])
 
     live.stop_websocket()
 
-    print("DATA: ", live.data[-5:])
+    # print("DATA: ", live.data[-5:])
