@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 STOCKS = ['QQQ'] # 'BTC', 'VTI' 
 INTERVALS = ['1 Minute'] # '5 Minutes', '10 Minutes'
 
-st.title("Stock Price Monitor")
+st.markdown("<h1 style='text-align: center; color: black;'>Stock Price Monitor</h1>", unsafe_allow_html=True)
 
 # Create columns for the dropdowns
 col1, col2, col3 = st.columns(3)
@@ -58,7 +58,8 @@ while True:
     metric_placeholder.metric("Price", price, delta=delta)
 
     # Update the chart with the new data
-    fig = px.line(new_data, x=0, y=1, title="Stock Price Over Time (1-minute Interval)", labels={0: 'Time', 1: 'Price'}, markers=True)
+    graph_title = f"{selected_stock} ({selected_interval} Interval)"
+    fig = px.line(new_data, x=0, y=1, title=graph_title, labels={0: 'Time', 1: 'Price'}, markers=True)
 
     fig.update_traces(
         hovertemplate='Time: %{x}<br>Price: %{y}',
@@ -68,6 +69,18 @@ while True:
 
     # Update layout for panning and zooming
     fig.update_layout(
+        title={
+            'text': graph_title,
+            'y': 0.9,
+            'x': 0.01,
+            'xanchor': 'left',
+            'yanchor': 'top',
+            'font': {
+                'family': "Arial, sans-serif",
+                'size': 24,
+                'color': 'blue'
+            }
+        },
         uirevision='constant',  # maintain user's interactions
         dragmode='pan',  # enable panning
         hovermode='closest',
