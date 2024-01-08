@@ -8,8 +8,9 @@ from datetime import datetime, timedelta
 
 STOCKS = ['QQQ'] # 'BTC', 'VTI' 
 INTERVALS = ['1 Minute'] # '5 Minutes', '10 Minutes'
+THEMECOLOR = 'blue'
 
-st.markdown("<h1 style='text-align: center; color: black;'>Stock Price Monitor</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center; color: {THEMECOLOR};'>Stock Price Monitor</h1>", unsafe_allow_html=True)
 
 # Create columns for the dropdowns
 col1, col2, col3 = st.columns(3)
@@ -63,7 +64,7 @@ while True:
 
     fig.update_traces(
         hovertemplate='Time: %{x}<br>Price: %{y}',
-        line=dict(color='blue'),
+        line=dict(color=THEMECOLOR),
         marker=dict(size=3)
     )
 
@@ -78,7 +79,7 @@ while True:
             'font': {
                 'family': "Arial, sans-serif",
                 'size': 24,
-                'color': 'blue'
+                'color': THEMECOLOR
             }
         },
         uirevision='constant',  # maintain user's interactions
@@ -88,11 +89,15 @@ while True:
             autorange=True,
             rangeslider=dict(visible=False),  # disable range slider
             tickformat='%I:%M %p',
-            title="Time"
+            title="Time",
+            title_font={"color": THEMECOLOR},
+            tickfont={"color": THEMECOLOR}  
         ),
         yaxis=dict(
              autorange=True, 
-             title="Price"
+             title="Price",
+             title_font={"color": THEMECOLOR},
+             tickfont={"color": THEMECOLOR} 
         ),
     )
 
