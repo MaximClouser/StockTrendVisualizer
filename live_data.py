@@ -23,18 +23,20 @@ class LiveStream():
         self.window = 100
 
         # yahoo
-        self.yahoo_symbol = "BTC-USD"
+        # self.yahoo_symbol = "BTC-USD"
+        self.yahoo_symbol = "QQQ"
         self.interval = "1m"
         self.period = "1d"
         self.time_zone = 'US/Eastern'
 
         #finnhub
-        self.finnhub_symbol = "BINANCE:BTCUSDT"
+        # self.finnhub_symbol = "BINANCE:BTCUSDT"
+        self.finnhub_symbol = "QQQ"
 
         # initialize historic data
+        self.last_interval_data_point = None
+        self.current_data_point = None
         self.data = self.fetch_historical_data()
-        # print("HISTORY Start: ", self.data[0])
-        # print("HISTORY END: ", self.data[-1])
 
         # update with live data websocket
         self.enable_stack_trace = False
@@ -43,6 +45,15 @@ class LiveStream():
         self.start_websocket()
 
 
+
+    def get_last_interval_price(self):
+        if self.last_interval_data_point:
+            return float(self.last_interval_data_point[1])
+
+    def get_current_price(self):
+        if self.current_data_point:
+            return float(self.current_data_point[1])
+
     def get_data(self):
         return self.data[-self.window:]
         
@@ -50,7 +61,7 @@ class LiveStream():
     def fetch_historical_data(self):
         # df = yf.download(tickers=self.yahoo_symbol, period="5y", interval="1m", auto_adjust=True, prepost=False)
         stock = yf.Ticker(self.yahoo_symbol)
-        historical_data = stock.history(period = self.period, interval=self.interval)
+        historical_data = stock.history(period=self.period, interval=self.interval)
         eastern = pytz.timezone(self.time_zone)
         historical_data.index = historical_data.index.tz_convert(eastern)
         return [(index, row['Close']) for index, row in historical_data.iterrows()]
@@ -58,9 +69,11 @@ class LiveStream():
 
     def add_data(self, data_point, raw_timestamp):
         # only for 1m as of now, need to adapt later!
+        self.current_data_point = data_point
         time = raw_timestamp % 6000
         if time == 0:
             self.data.append(data_point)
+            self.last_interval_data_point = data_point
         else:
             self.data[-1] = data_point
 
@@ -113,7 +126,9 @@ if __name__ == '__main__':
 
     # print("DATA: ", live.data[-5:])
 
-    time.sleep(120)
+
+    time.sleep(5)
+    live.get_current_price()
 
     # print("FRESH: ", live.data[-1])
 
