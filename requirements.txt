@@ -4,3 +4,5 @@ pandas
 yfinance
 websocket-client
 python-dotenv
+pytz
+streamlit

@@ -112,6 +112,8 @@ class LiveStream():
 
     def on_error(self, ws, error):
         print(f"WebSocket error: {error}")
+        #TODO: Add error handling when connection lost (retry)
+        #TODO: Add wait-and-retry if api limit reached
 
 
     def on_close(self, ws, close_status_code, close_msg):
@@ -135,6 +137,7 @@ class LiveStream():
         if self.ws_app is not None:
             self.ws_app.close()
             self.ws_thread.join()
+            self.ws_thread = None
             print("Closed Websocket!")
 
 
