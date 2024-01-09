@@ -16,6 +16,7 @@ load_dotenv()
 
 class LiveStream():
 
+
     def __init__(self):
         # constants:
         api_key = os.getenv('FINNHUB_API_KEY')
@@ -36,8 +37,9 @@ class LiveStream():
         # initialize historic data
         self.open_price = None
         self.data = self.fetch_historical_data()
-        self.last_interval_data_point = self.data[-1]
         self.current_data_point = self.data[-1]
+        self.last_interval_data_point = self.current_data_point
+        self.last_minute = self.current_data_point[0].minute
 
         # update with live data websocket
         self.enable_stack_trace = False
@@ -46,22 +48,23 @@ class LiveStream():
         self.start_websocket()
 
 
-
     def get_open_price(self):
         return self.open_price
+    
 
     def get_last_interval_price(self):
         if self.last_interval_data_point:
             return float(self.last_interval_data_point[1])
+        
 
     def get_current_price(self):
         if self.current_data_point:
             return float(self.current_data_point[1])
+        
 
     def get_data(self):
-        # if self.data:
-        #     # return self.data[-self.window:]
         return self.data
+    
         
     def fetch_historical_data(self):
         # df = yf.download(tickers=self.yahoo_symbol, period="5y", interval="1m", auto_adjust=True, prepost=False)
@@ -72,16 +75,20 @@ class LiveStream():
         self.open_price = historical_data.iloc[0]['Open'] if not historical_data.empty else None
         return [(index, row['Close']) for index, row in historical_data.iterrows()][-self.window:] # trim to window size
     
-
-    def is_closing_point(self, raw_timestamp):
-    # only for 1m as of now, need to adapt later!
+    
+    def is_closing_point(self, time_stamp):
+        # only for 1m as of now, need to adapt later!
         if self.interval == "1m":
-            return (raw_timestamp % 6000) == 0
+            # print(data_point, raw_timestamp%6000)
+            if time_stamp.minute != self.last_minute:
+                self.last_minute = time_stamp.minute
+                return True
+        return False
 
 
     def add_data(self, data_point, raw_timestamp):
         self.current_data_point = data_point
-        if self.is_closing_point(raw_timestamp):
+        if self.is_closing_point(data_point[0]):
             self.data.append(data_point)
             self.last_interval_data_point = data_point
         else:
@@ -104,7 +111,18 @@ class LiveStream():
 
 
     def on_error(self, ws, error):
-        print(error)
+        print(f"WebSocket error: {error}")
+        if "rate limit" in str(error).lower():
+            self.stop_websocket()
+            print("Rate limited. Waiting before reconnecting...")
+            time.sleep(60)
+            self.start_websocket()
+        else:
+            # for other erros just retry
+            self.stop_websocket()
+            print("Reconnecting...")
+            time.sleep(2)
+            self.start_websocket()
 
 
     def on_close(self, ws, close_status_code, close_msg):
@@ -115,9 +133,6 @@ class LiveStream():
     def on_open(self, ws):
         subscription_message = json.dumps({"type": "subscribe", "symbol": self.finnhub_symbol})
         ws.send(subscription_message)
-        # ws.send('{"type":"subscribe","symbol":"AMZN"}')
-        # ws.send('{"type":"subscribe","symbol":"QQQ"}')
-        # ws.send('{"type":"subscribe","symbol":"NASDAQ:QQQ"}')
 
 
     def start_websocket(self):
@@ -134,11 +149,11 @@ class LiveStream():
             print("Closed Websocket!")
 
 
+
 if __name__ == '__main__':
     live = LiveStream()
 
     # print("DATA: ", live.data[-5:])
-
 
     time.sleep(5)
     live.get_current_price()

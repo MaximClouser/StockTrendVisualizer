@@ -52,7 +52,6 @@ while True:
     if not current_price:
          current_price = 0
     
-    # delta = current_price - last_price
     delta = round(((current_price - open_price) / open_price) * 100, 2)
     delta = str(delta) + "%"
     price = "$" + str(current_price)
