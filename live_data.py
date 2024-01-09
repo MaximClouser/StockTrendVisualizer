@@ -112,17 +112,17 @@ class LiveStream():
 
     def on_error(self, ws, error):
         print(f"WebSocket error: {error}")
-        if "rate limit" in str(error).lower():
-            self.stop_websocket()
-            print("Rate limited. Waiting before reconnecting...")
-            time.sleep(60)
-            self.start_websocket()
-        else:
-            # for other erros just retry
-            self.stop_websocket()
-            print("Reconnecting...")
-            time.sleep(2)
-            self.start_websocket()
+        # if "rate limit" in str(error).lower():
+        #     self.stop_websocket()
+        #     print("Rate limited. Waiting before reconnecting...")
+        #     time.sleep(60)
+        #     self.start_websocket()
+        # else:
+        #     # for other erros just retry
+        #     self.stop_websocket()
+        #     print("Reconnecting...")
+        #     time.sleep(2)
+        #     self.start_websocket()
 
 
     def on_close(self, ws, close_status_code, close_msg):
