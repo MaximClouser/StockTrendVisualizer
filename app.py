@@ -43,18 +43,18 @@ if st.button("KILL PROGRAM"):
 
 # get data from DS object
 def fetch_data():
-    return live_data_stream.get_data(), live_data_stream.get_current_price(), live_data_stream.get_last_interval_price()
+    return live_data_stream.get_data(), live_data_stream.get_current_price(), live_data_stream.get_open_price()
 
 # update chart
 while True:
-    new_data, current_price, last_price = fetch_data()
+    new_data, current_price, open_price = fetch_data()
 
     if not current_price:
          current_price = 0
-    if not last_price:
-         last_price = current_price
     
-    delta = current_price - last_price
+    # delta = current_price - last_price
+    delta = round(((current_price - open_price) / open_price) * 100, 2)
+    delta = str(delta) + "%"
     price = "$" + str(current_price)
     metric_placeholder.metric("Price", price, delta=delta)
 

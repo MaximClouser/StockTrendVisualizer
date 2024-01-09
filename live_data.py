@@ -34,9 +34,10 @@ class LiveStream():
         self.finnhub_symbol = "QQQ"
 
         # initialize historic data
-        self.last_interval_data_point = None
-        self.current_data_point = None
+        self.open_price = None
         self.data = self.fetch_historical_data()
+        self.last_interval_data_point = self.data[-1]
+        self.current_data_point = self.data[-1]
 
         # update with live data websocket
         self.enable_stack_trace = False
@@ -45,6 +46,9 @@ class LiveStream():
         self.start_websocket()
 
 
+
+    def get_open_price(self):
+        return self.open_price
 
     def get_last_interval_price(self):
         if self.last_interval_data_point:
@@ -55,8 +59,9 @@ class LiveStream():
             return float(self.current_data_point[1])
 
     def get_data(self):
-        return self.data[-self.window:]
-        
+        # if self.data:
+        #     # return self.data[-self.window:]
+        return self.data
         
     def fetch_historical_data(self):
         # df = yf.download(tickers=self.yahoo_symbol, period="5y", interval="1m", auto_adjust=True, prepost=False)
@@ -64,18 +69,26 @@ class LiveStream():
         historical_data = stock.history(period=self.period, interval=self.interval)
         eastern = pytz.timezone(self.time_zone)
         historical_data.index = historical_data.index.tz_convert(eastern)
-        return [(index, row['Close']) for index, row in historical_data.iterrows()]
+        self.open_price = historical_data.iloc[0]['Open'] if not historical_data.empty else None
+        return [(index, row['Close']) for index, row in historical_data.iterrows()][-self.window:] # trim to window size
     
 
+    def is_closing_point(self, raw_timestamp):
+    # only for 1m as of now, need to adapt later!
+        if self.interval == "1m":
+            return (raw_timestamp % 6000) == 0
+
+
     def add_data(self, data_point, raw_timestamp):
-        # only for 1m as of now, need to adapt later!
         self.current_data_point = data_point
-        time = raw_timestamp % 6000
-        if time == 0:
+        if self.is_closing_point(raw_timestamp):
             self.data.append(data_point)
             self.last_interval_data_point = data_point
         else:
             self.data[-1] = data_point
+
+        if len(self.data) > self.window:
+            self.data.pop(0)
 
 
     def on_message(self, ws, message):
