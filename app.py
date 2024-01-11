@@ -99,7 +99,6 @@ while True:
              tickfont={"color": THEMECOLOR} 
         ),
     )
-
     line_color = "green" if current_price >= last_price else "red"
     fig.add_hline(y=current_price, line_dash="dot", annotation_text=f"{price}", 
                   annotation_position="bottom right", line_color=line_color)
