@@ -1,5 +1,9 @@
 # StockTrendVisualizer  
-(Under Construction)
+(Under Construction)  
+
+About:  
+A real time stock price monitor providing live prices and trend prediction using time series prediction from Nixtla.
+Future additions will include real-time prediction capability from custom trained time series transformer models (exploring Autoformer and Informer models)  
 
 Install requirements:  
 `pip install -r requirements.txt`
