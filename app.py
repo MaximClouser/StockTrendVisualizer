@@ -1,12 +1,10 @@
+import streamlit as st
+import plotly.express as px
+import time
+import threading
+
 from live_data import LiveStream
 from series_predictor import PredictSeries
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import numpy as np
-import time
-from datetime import datetime, timedelta
-import threading
 
 STOCKS = ['QQQ'] # 'BTC', 'VTI' 
 INTERVALS = ['1 Minute'] # '5 Minutes', '10 Minutes'
@@ -23,28 +21,21 @@ with col2:
 with col3:
     selected_interval = st.selectbox('Select Interval', INTERVALS)
 
+chart_title = f"{selected_stock} ({selected_interval} Interval)"
 chart_placeholder = st.empty()
 
-# live data object
-if "live_data_stream" in st.session_state:
-    live_data_stream = st.session_state.live_data_stream
-else:
-    live_data_stream = LiveStream()
-    st.session_state.live_data_stream = live_data_stream
+# Function to manage session state
+def get_session_state(key, constructor):
+    if key not in st.session_state:
+        st.session_state[key] = constructor()
+    return st.session_state[key]
 
-# series predictor
-if "predict_series" in st.session_state:
-    predict_series = st.session_state.predict_series
-else:
-    predict_series = PredictSeries()
-    st.session_state.predict_series = predict_series
-
-# get new prediction flag
-if "create_prediction" in st.session_state:
-    create_prediction = st.session_state.create_prediction
-else:
-    create_prediction = False
-    st.session_state.create_prediction = create_prediction
+# managing live data stream
+live_data_stream = get_session_state("live_data_stream", LiveStream)
+# managing series predictor
+predict_series = get_session_state("predict_series", PredictSeries)
+# managing prediction flag
+create_prediction = get_session_state("create_prediction", lambda: False)
 
 # cleanup resources on shutdown
 def on_app_close():
@@ -71,10 +62,8 @@ def update_metric(current_price, open_price, price_str):
     metric_placeholder.metric("Price", price_str, delta=delta)
 
 
-# update chart
-graph_title = f"{selected_stock} ({selected_interval} Interval)"
+# Update chart with live stream data
 while True:
-
     new_data, current_price, open_price, last_price = fetch_data()
     if not current_price:
         current_price = 0
@@ -87,9 +76,8 @@ while True:
         prediction_thread = threading.Thread(target=predict_series.generate_prediction, args=(new_data, 15))
         prediction_thread.start()
         
-    
     # Update the chart with the new data
-    fig = px.line(new_data, x=0, y=1, title=graph_title, labels={0: 'Time', 1: 'Price'}, markers=True)
+    fig = px.line(new_data, x=0, y=1, title=chart_title, labels={0: 'Time', 1: 'Price'}, markers=True)
     fig.update_traces(
         hovertemplate='Time: %{x}<br>Price: %{y}',
         line=dict(color=THEMECOLOR),
@@ -104,7 +92,7 @@ while True:
     # Update layout for panning and zooming
     fig.update_layout(
         title={
-            'text': graph_title,
+            'text': chart_title,
             'y': 0.9,
             'x': 0.01,
             'xanchor': 'left',
@@ -140,6 +128,7 @@ while True:
             x=0.5
         )
     )
+    
     line_color = "green" if current_price >= last_price else "red"
     fig.add_hline(y=current_price, line_dash="dot", annotation_text=f"{price_str}", 
                   annotation_position="bottom right", line_color=line_color)

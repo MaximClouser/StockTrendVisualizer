@@ -1,10 +1,7 @@
-# https://finnhub.io/pricing
-# 60 calls / minute
 import websocket
 import json
 import yfinance as yf
 import threading
-from datetime import datetime
 from pandas import Timestamp
 import time
 import os
@@ -19,8 +16,8 @@ class LiveStream():
 
     def __init__(self):
         # constants:
-        api_key = os.getenv('FINNHUB_API_KEY')
-        self.url = "wss://ws.finnhub.io?token=" + api_key
+        api_key = os.getenv('FINNHUB_API_KEY') # https://finnhub.io/pricing
+        self.url = "wss://ws.finnhub.io?token=" + api_key # 60 calls / minute
         self.window = 100
         self.predict_window = 1000
 

@@ -1,9 +1,7 @@
 import os
 import pandas as pd
 from nixtlats import TimeGPT
-import time
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -42,8 +40,7 @@ class PredictSeries():
         # remove gaps / duplicates
         df = self.clean(data)
         # get prediction
-        # timegpt_fcst_df = self.timegpt.forecast(df=df, h=horizon, freq='min', time_col='ds', target_col='y')
-        timegpt_fcst_with_history_df = self.timegpt.forecast(df=df, h=horizon, finetune_steps=100, time_col='ds', target_col='y',add_history=True,freq='min')
+        timegpt_fcst_with_history_df = self.timegpt.forecast(df=df, h=horizon, finetune_steps=100, time_col='ds', target_col='y', add_history=True, freq='min')
         # convert predicted data frame to time and price lists
         times = timegpt_fcst_with_history_df['ds'].tolist()
         prices = timegpt_fcst_with_history_df['TimeGPT'].tolist() 
