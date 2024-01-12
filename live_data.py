@@ -22,6 +22,7 @@ class LiveStream():
         api_key = os.getenv('FINNHUB_API_KEY')
         self.url = "wss://ws.finnhub.io?token=" + api_key
         self.window = 100
+        self.predict_window = 1000
 
         # yahoo
         # self.yahoo_symbol = "BTC-USD"
@@ -99,6 +100,7 @@ class LiveStream():
 
 
     def on_message(self, ws, message):
+        print(message)
         data = json.loads(message)
         if 'data' in data:
             for trade in data['data']:
