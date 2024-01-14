@@ -55,12 +55,10 @@ if st.button("Get New Prediction"):
 def fetch_data():
     return live_data_stream.get_data(), live_data_stream.get_current_price(), live_data_stream.get_open_price(), live_data_stream.get_last_interval_price()
 
-
 def update_metric(current_price, open_price, price_str):
     delta = round(((current_price - open_price) / open_price) * 100, 2)
     delta = str(delta) + "%"
     metric_placeholder.metric("Price", price_str, delta=delta)
-
 
 # Update chart with live stream data
 while True:
