@@ -82,9 +82,9 @@ while True:
         marker=dict(size=3)
     )
 
-    new_prediction = predict_series.get_prediction()
-    if new_prediction:
-        fig.add_scatter(x=new_prediction[0], y=new_prediction[1], mode='lines', 
+    prediction = predict_series.get_prediction()
+    if prediction:
+        fig.add_scatter(x=prediction[0], y=prediction[1], mode='lines', 
                         name='Smart Series Prediction', line=dict(color='rgba(218, 112, 214, 0.3)', width=7))
 
     # Update layout for panning and zooming
