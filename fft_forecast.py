@@ -18,7 +18,6 @@ def fetch_historical_data():
 def fft_forecast(data, N=1024, N_first=1, N_last=3, futureBars=50):
     # Forward FFT
     fft_values = fft(data, n=N)
-
     # Filtering based on selected frequency components
     filtered_fft = np.zeros_like(fft_values)
     for i in range(N_first, N_last + 1):
@@ -50,7 +49,6 @@ data = fetch_historical_data()
 print(len(data))
 last_256 = data[-1024:]
 data = [float(data_point[1]) for data_point in last_256]
-
 
 filtered_series, predictions = fft_forecast(data)
 print(predictions)
