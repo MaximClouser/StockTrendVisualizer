@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from scipy.fft import fft, ifft
 
 import yfinance as yf
