@@ -75,9 +75,7 @@ class LiveStream():
     
     
     def is_closing_point(self, time_stamp):
-        # only for 1m as of now, need to adapt later!
         if self.interval == "1m":
-            # print(data_point, raw_timestamp%6000)
             if time_stamp.minute != self.last_minute:
                 self.last_minute = time_stamp.minute
                 return True
@@ -140,21 +138,12 @@ class LiveStream():
             print("Closed Websocket!")
 
 
-
 if __name__ == '__main__':
     live = LiveStream()
-
-    # print("DATA: ", live.data[-5:])
 
     time.sleep(5)
     live.get_current_price()
 
-    # print("FRESH: ", live.data[-1])
-
-    # print("DATA: ", live.data[-5:])
-
     # print(live.data[-60:])
 
     live.stop_websocket()
-
-    # print("DATA: ", live.data[-5:])

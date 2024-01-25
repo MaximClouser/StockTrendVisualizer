@@ -4,10 +4,9 @@ from scipy.fft import fft, ifft
 import yfinance as yf
 import pytz
 
+
 def fetch_historical_data():
-    # df = yf.download(tickers=self.yahoo_symbol, period="5y", interval="1m", auto_adjust=True, prepost=False)
     stock = yf.Ticker("QQQ")
-    # historical_data = stock.history(period="1d", interval="1m")
     historical_data = stock.history(period="5y", interval="1d")
     eastern = pytz.timezone('US/Eastern')
     historical_data.index = historical_data.index.tz_convert(eastern)
